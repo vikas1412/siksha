@@ -1,0 +1,5 @@
+.idea
+siksha.iml
+__pycache__
+.git
+db.sqlite3
