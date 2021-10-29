@@ -1,3 +1,4 @@
 # Siksha web app
 
-Siksha django based app for online exams and a lot more!!
+Siksha django based app for a unique experience in online exams on the go! 
+Thanks!
