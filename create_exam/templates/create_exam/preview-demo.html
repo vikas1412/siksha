@@ -5,7 +5,7 @@
     {{ id }}
 {% endblock %}
 
-{% block css %}
+{% block link %}
     <link rel="stylesheet" href="{% static 'create_exam/home.css' %}">
 {% endblock %}
 
@@ -16,46 +16,213 @@
 {% block timefield %}
 {% endblock %}
 
+{% block css %}
+{% endblock %}
+
 {% block body %}
     <div class="container">
         <div class="row mt-4">
             <div class="col-md-1 order-md-1 mb-4">
-            </div>
-            <div class="col-md-7 order-md-2">
-                <div>
-                    <div class="btn-group">
-                        <button type="button" class="ms-auto btn btn-outline-primary btn-sm p-1 dropdown-toggle"
-                                data-bs-toggle="dropdown"
-                                aria-expanded="false">
-                            Action
-                        </button>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#">Delete all</a></li>
-                            <li><a class="dropdown-item" href="{% url 'upload-questions-in-bulk' exam_id %}">Upload
-                                questions in bulk</a></li>
-                        </ul>
+                <a class="btn btn-outline-info" data-bs-toggle="offcanvas" href="#offcanvasExample" role="button"
+                   aria-controls="offcanvasExample">
+                    <i class="bi bi-blockquote-left"></i>
+                </a>
+
+                <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample"
+                     aria-labelledby="offcanvasExampleLabel">
+                    <div class="offcanvas-header">
+                        <h5 class="offcanvas-title" id="offcanvasExampleLabel">Instructions:</h5>
+                        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"
+                                aria-label="Close"></button>
                     </div>
-                </div>
-                {% for question in questions %}
-                    <div class="d-flex justify-content-between">
-                        <div class="">
-                            <a><h5 style="color: #7b666d"><span class="serial-no">{{ forloop.counter }}.</span>{{ question.question }}</h5></a>
-                            <ul class="question-tag">
-                                {% for option in question.questionoption_set.all %}
-                                    <li>{{ option.option }}</li>
-                                {% endfor %}
+                    <div class="offcanvas-body">
+                        <div>
+                            <ul>
+                                <li>Read each question carefully.</li>
+                                <li>You cannot skip a question. You must provide an answer to each question to proceed
+                                    with the test.
+                                </li>
+                                <li>Once answered, you cannot go back to a question. You will be given an opportunity to
+                                    review questions at the end of the test.
+                                </li>
+                                <li>If you exit the test, you will not be able to resume your place in the test. You
+                                    will have to start from the beginning.
+                                </li>
+                                <li>There may be tools available (i.e., glossary, calculator, etc.) to help you answer
+                                    the questions. You can access this information by clicking in the tools bar that may
+                                    be located above the questions.
+                                </li>
+                                <li>There may be support information that is required to answer the questions. You can
+                                    access this information by clicking on "Show Support Information" located in the
+                                    question box.
+                                </li>
+                                <li>Your test will not be timed. You can take as much time as you need to complete this
+                                    test. Please keep in mind, however, that the actual test that you take to gain
+                                    employment with the County of Los Angeles will be timed.
+                                </li>
+                                <li>This practice test was designed to build upon a basic understanding of the subject
+                                    area being tested. It was not intended to serve as the sole instruction method or
+                                    initial exposure to the subject area. Instead, it should serve as a refresher
+                                    mechanism in your examination preparation. If more in-depth training is required,
+                                    visit the Local Resources section of this site to locate colleges and organizations
+                                    that may provide additional training.
+                                </li>
+                                <li>For more detailed instructions, please visit our System Overview section.</li>
+                                <li>This test is only a guide. The test questions that you complete during your actual
+                                    employment test may vary in format, content, and level of difficulty.
+                                </li>
                             </ul>
                         </div>
                     </div>
+                </div>
+            </div>
+            <div class="col-md-7 m-sm-auto order-md-2">
+            <button class="btn btn-outline-info" onclick="autoFullScreen()" value="FullScreen">FullScreen</button>
+                {% for question in questions %}
+                    <form method="post" name="question-response-form" id="question-response-form">
+                        {% csrf_token %}
+                        <input type="hidden" id="some_text" value="SOME_TEXT_WOW-{{ forloop.counter }}">
+                        <input type="hidden" name="questionIdName" id="questionId" value="{{ question.id }}">
+                        <input type="hidden" name="snoName" id="sno" value="{{ forloop.counter }}">
+                        <div id="question-{{ forloop.counter }}" hidden class="questions">
+
+                            {# Used by get `OneQuestionAtATime` funtion #}
+                            <input class="currentQuestion" id="{{ forloop.counter }}" type="hidden"
+                                   value="{{ forloop.counter }}">
+
+                            <div class="d-flex justify-content-between">
+                                <div class="">
+                                    <div class="d-flex justify-content-around">
+                                        <span class="serial-no">{{ forloop.counter }}. </span>
+                                        <h5 style="color: #7b666d">{{ question.question }}</h5>
+                                    </div>
+                                    <ul class="question-tag">
+                                        {% for option in question.questionoption_set.all %}
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio"
+                                                       name="{{ question.id }}-option"
+                                                       id="{{ question.id }}-option-{{ forloop.counter }}"
+                                                       value="{{ option.id }}">
+                                                <label class="form-check-label"
+                                                       for="{{ question.id }}-option-{{ forloop.counter }}">
+                                                    {{ option.option }}
+                                                </label>
+                                            </div>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                            <button onclick="nextQuestion('{{ question.id }}', '{{ forloop.counter }}')" type="submit"
+                                    class="mb-4 btn btn-outline-info">
+                                Next
+                            </button>
+                        </div>
+                    </form>
                 {% endfor %}
             </div>
-            <div class="col-md-4 border rounded order-md-3 mb-4">
+
+            <input type="hidden" value="{{ exam.duration }}" id="duration">
+
+            <div class="col-md-4 border m-sm-auto rounded order-md-3 mb-4">
                 <div class="d-flex p-2">
                     <p class="m-auto">Time Remaining: </p>
-                    <div class="ms-auto rounded border border-1 border-danger p-2">1:32:00</div>
+                    <div id="time-remaining" class="ms-auto rounded border border-1 border-danger p-2"></div>
                 </div>
                 <hr>
+                <div class="p-2">
+                    <div class="row tileBox">
+                        {% for ques in exam.examquestion_set.all %}
+                            <button onclick="getByNumber('{{ forloop.counter }}')" id="tile-{{ forloop.counter }}"
+                                    class="questionTile border p-3 text-center col-4 col-md-2">{{ forloop.counter }}</button>
+                        {% endfor %}
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.js"
+            integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc="
+            crossorigin="anonymous"></script>
+    <script>
+        function hideAllQuestions() {
+            {% for _ in exam.examquestion_set.all %}
+                document.getElementById("question-{{ forloop.counter }}").hidden = true;
+                document.getElementById('tile-{{ forloop.counter }}').style.backgroundColor = "#BCCDB817";
+                document.getElementById('tile-{{ forloop.counter }}').style.fontSize = "16px";
+                document.getElementById('tile-{{ forloop.counter }}').style.color = "black";
+            {% endfor %}
+        }
+
+        function getByNumber(currentNumber) {
+            hideAllQuestions();
+            let currentTile = parseInt(currentNumber);
+
+            document.getElementById('question-' + currentTile).removeAttribute("hidden");
+            // Green color to used on answered question "#1BBC9B"
+            document.getElementById('tile-' + currentTile).style.backgroundColor = "purple";
+            document.getElementById('tile-' + currentTile).style.fontSize = "21px";
+            document.getElementById('tile-' + currentTile).style.height = "58px";
+            document.getElementById('tile-' + currentTile).style.color = "white";
+        }
+
+        function nextQuestion(questionId, sno) {
+            // window.alert("This is some text" + document.getElementById("some_text").value);
+            let selectedOptionId;
+            if (document.querySelector("input[name=" + CSS.escape(questionId) + '-option' + "]:checked")) {
+                selectedOptionId = document.querySelector("input[name=" + CSS.escape(questionId) + '-option' + "]:checked").value;
+            }
+            // Save to db.
+            let currentQuestion = parseInt(sno);
+            let nextQuestion = currentQuestion + 1;
+            document.getElementById('question-' + currentQuestion).hidden = true;
+            document.getElementById('question-' + nextQuestion).removeAttribute("hidden");
+            return [questionId, selectedOptionId];
+        }
+
+        $(document).on('submit', '#question-response-form', function (e) {
+            let questionId = $('input[name=questionIdName]').val();
+            let sno = $('input[name=snoName]').val();
+            let csrf = $('input[name=csrfmiddlewaretoken]').val();
+            window.alert(csrf);
+
+            window.alert(questionId + " QID : SnoID " + sno);
+            let selectedDetails = nextQuestion(questionId, sno);
+            e.preventDefault();
+            $.ajax({
+                type: 'POST',
+                url: '{% url "save-response" %}',
+                data:
+                    {
+                        questionId: selectedDetails[0],
+                        selectedOptionId: selectedDetails[1],
+                        csrfmiddlewaretoken: csrf
+                    }
+                //     ,
+                // success:function(){
+                //    alert('Saved');
+                // }
+            })
+        });
+
+        let getOneQuestionAtATime;
+        getOneQuestionAtATime = () => {
+            let currentQuestion = document.querySelector(".currentQuestion").value;
+            currentQuestion = parseInt(currentQuestion);
+            document.getElementById('question-' + currentQuestion).removeAttribute("hidden");
+        }
+
+        let autoFullScreen;
+        autoFullScreen = () => {
+            window.alert("Please enable full screen");
+            var elem = document.documentElement;
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen();
+            } else if (elem.webkitRequestFullscreen) { /* Safari */
+                elem.webkitRequestFullscreen();
+            } else if (elem.msRequestFullscreen) { /* IE11 */
+                elem.msRequestFullscreen();
+            }
+        }
+        window.onload = getOneQuestionAtATime();
+    </script>
 {% endblock %}

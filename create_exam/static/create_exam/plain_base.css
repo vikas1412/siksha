@@ -1,11 +1,14 @@
-.navbar-brand {
-    color: bisque;
-}
-.question-tag {
-    color: slategrey;
+html {
+    /*overflow-y: hidden;*/
 }
 
-.serial-no {
-    color: darkgrey;
-    padding-right: 4px;
+.questionTile {
+    padding: 12px;
+    background-color: rgba(188,205,184,0.09);
+}
+
+.tileBox {
+    height: 100%;
+    max-height: 400px;
+    overflow: scroll;
 }
