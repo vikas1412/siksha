@@ -1,0 +1,61 @@
+{% extends 'create_exam/plain_base.html' %}
+{% load static %}
+
+{% block title %}
+    {{ id }}
+{% endblock %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'create_exam/home.css' %}">
+{% endblock %}
+
+{% block js %}
+    <script src="{% static 'create_exam/exam_live.js' %}"></script>
+{% endblock %}
+
+{% block timefield %}
+{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <div class="row mt-4">
+            <div class="col-md-1 order-md-1 mb-4">
+            </div>
+            <div class="col-md-7 order-md-2">
+                <div>
+                    <div class="btn-group">
+                        <button type="button" class="ms-auto btn btn-outline-primary btn-sm p-1 dropdown-toggle"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false">
+                            Action
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#">Delete all</a></li>
+                            <li><a class="dropdown-item" href="{% url 'upload-questions-in-bulk' exam_id %}">Upload
+                                questions in bulk</a></li>
+                        </ul>
+                    </div>
+                </div>
+                {% for question in questions %}
+                    <div class="d-flex justify-content-between">
+                        <div class="">
+                            <a><h5 style="color: #7b666d"><span class="serial-no">{{ forloop.counter }}.</span>{{ question.question }}</h5></a>
+                            <ul class="question-tag">
+                                {% for option in question.questionoption_set.all %}
+                                    <li>{{ option.option }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="col-md-4 border rounded order-md-3 mb-4">
+                <div class="d-flex p-2">
+                    <p class="m-auto">Time Remaining: </p>
+                    <div class="ms-auto rounded border border-1 border-danger p-2">1:32:00</div>
+                </div>
+                <hr>
+            </div>
+        </div>
+    </div>
+{% endblock %}

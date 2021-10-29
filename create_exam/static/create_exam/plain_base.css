@@ -1,0 +1,11 @@
+.navbar-brand {
+    color: bisque;
+}
+.question-tag {
+    color: slategrey;
+}
+
+.serial-no {
+    color: darkgrey;
+    padding-right: 4px;
+}
