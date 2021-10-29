@@ -1,0 +1,32 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Build app') {
+            steps {
+                echo 'Taking from rep and building app'
+            }
+        }
+        stage('Testing app') {
+            steps {
+                echo 'Taking app for erros!'
+            }
+        }
+        stage('Deploy app') {
+            steps {
+                echo 'Deploying to server after test success!'
+            }
+        }
+    }
+    post {
+        failure {
+            emailext body: '''Hi Vikas,
+
+            Your `Siksha App` was build, tested and deployed successfully just now. 
+            This is an auto generated email, please don\'t reply to this mail.
+            
+            Best Regards,
+            Developer -Vikas''', subject: 'Siksha app Build messages', to: 'vikasedu10@gmail.com'
+        }
+    }
+}
