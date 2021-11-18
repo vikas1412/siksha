@@ -1,7 +1,7 @@
 {% load static %}
 
 <!doctype html>
-<html lang="en">
+<html lang="en" {% block disable_select_text %}{% endblock %}>
 <head>
     <!-- Required meta tags -->
     <meta charset="utf-8">
@@ -18,11 +18,11 @@
         {% block css %}{% endblock %}
     </style>
 </head>
-<body>
+<body {% block disable_right_click %}{% endblock %}>
 
 <nav class="navbar navbar-expand-lg navbar-light bg-light small p-1">
     <div class="container-fluid">
-        <a class="navbar-brand" href="{% url 'home' %}">Siksha</a>
+        <a class="navbar-brand">Siksha</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
                 aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>

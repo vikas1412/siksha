@@ -38,8 +38,10 @@ class UserResponse(models.Model):
     user = models.ForeignKey(User, models.SET_NULL, null=True)
 
 
-class Todo(models.Model):
-    task = models.CharField(max_length=200)
+class UserInfo(models.Model):
+    fullname = models.CharField(max_length=200)
+    email = models.EmailField(max_length=200)
+    password = models.CharField(max_length=40)
 
     def __str__(self):
-        return f"{self.task}"
+        return self.email

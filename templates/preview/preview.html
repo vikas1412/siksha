@@ -1,0 +1,239 @@
+{% extends 'create_exam/plain_base.html' %}
+{% load static %}
+
+{% block disable_right_click %}oncontextmenu="return false;"{% endblock %}
+{% block disable_select_text %}onselectstart="return false"{% endblock %}
+
+{% block title %}
+    Siksha - Preview
+{% endblock %}
+
+{% block link %}
+    <link rel="stylesheet" href="{% static 'create_exam/home.css' %}">
+{% endblock %}
+
+{% block js %}
+    <script src="{% static 'create_exam/exam_live.js' %}"></script>
+{% endblock %}
+
+{% block timefield %}
+{% endblock %}
+
+{% block css %}
+    .modal-open .container-fluid, .modal-open  .container {
+    -webkit-filter: blur(9px) grayscale(90%);
+    }
+
+    .mark-selected {
+        background-color: orange;
+    }
+    .mark-visited {
+        background-color: #ff7f7f;
+    }
+    .mark-current-tile {
+        color: #ff7f7f;
+    }
+{% endblock %}
+
+{% block body %}
+    <div class="message">
+        <audio hidden id="click-sound" src="{% static 'sound/click.wav' %}">
+            <source src="{% static 'sound/click.wav' %}" type="audio/ogg">
+        </audio>
+
+        <audio hidden id="warning-sound" src="{% static 'sound/warning.wav' %}">
+            <source src="{% static 'sound/click.wav' %}" type="audio/ogg">
+        </audio>
+    </div>
+
+    <div class="supreme-container container">
+        <div class="row mt-4">
+            {% include 'create_exam/content/instructions.html' %}
+
+            <div id="action-buttons" class="col-md-7 m-sm-auto order-md-2">
+                {#<!-- Enable full Screen popup alert -->#}
+                {#<button hidden id="fullscreen-popup" type="button" class="warning-modal" data-bs-toggle="modal"#}
+                {#        data-bs-target="#staticBackdrop">#}
+                {#</button>#}
+                {##}
+                {#<!-- Fullscreen message -->#}
+                {#<button hidden id="fullscreen-message" type="button" class="warning-modal" data-bs-toggle="modal"#}
+                {#        data-bs-target="#staticBackdrop1">#}
+                {#</button>#}
+
+                {% for question in questions %}
+                    <form method="post" name="question-response-form" id="question-response-form">
+                        {% csrf_token %}
+                        <input type="hidden" name="questionIdName" id="questionId" value="{{ question.id }}">
+                        <input type="hidden" name="snoName" id="sno" data-sid="{{ forloop.counter }}">
+                        <div id="qid-{{ question.id }}" hidden class="questions">
+                            {# Used by get `OneQuestionAtATime` funtion #}
+                            <input class="currentQuestion" id="{{ question.id }}" type="hidden"
+                                   value="{{ question.id }}">
+
+                            <div class="d-flex justify-content-between">
+                                <div class="">
+                                    <div class="d-flex justify-content-around">
+                                        <span class="serial-no">{{ forloop.counter }}. </span>
+                                        <h5 style="color: #7b666d">{{ question.question }}</h5>
+                                    </div>
+                                    <ul class="question-tag">
+                                        {% for option in question.questionoption_set.all %}
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio"
+                                                       name="{{ question.id }}-option"
+                                                       id="{{ question.id }}-option-{{ forloop.counter }}"
+                                                       value="{{ option.id }}">
+                                                <label class="form-check-label"
+                                                       for="{{ question.id }}-option-{{ forloop.counter }}">
+                                                    {{ option.option }}
+                                                </label>
+                                            </div>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="d-grid gap-2 d-md-block">
+                                <input class="btn btn-outline-warning btn-sm" type="button" value="Mark for review">
+                                <input class="btn btn-outline-info btn-sm save-and-next-q" data-sid="{{ question.id }}"
+                                       type="button"
+                                       value="Save & Next">
+                            </div>
+                        </div>
+                    </form>
+                {% endfor %}
+            </div>
+
+            <input type="hidden" value="{{ exam.duration }}" id="duration">
+
+            <div class="col-md-4 border m-sm-auto rounded order-md-3 mb-4">
+                <div class="d-flex p-2">
+                    <p class="m-auto">Time Remaining: </p>
+                    <div id="time-remaining" class="ms-auto rounded border border-1 border-danger p-2"></div>
+                </div>
+                <hr>
+                <div class="p-2">
+                    <div class="row tileBox">
+                        <div class="">
+                            {% for ques in exam.examquestion_set.all %}
+                                <input id="question-{{ ques.id }}" class="question-tile border p-3 text-center col-4 col-md-2" data-sid="{{ ques.id }}"
+                                       type="button" value="{{ forloop.counter }}">
+
+{#                                depriciated#}
+                                <button hidden onclfick="getByNumber('{{ forloop.counter }}')" id="question-id-{{ ques.id }}"
+                                        class="question-{{ forloop.counter }} tile-{{ forloop.counter }} questionTile border p-3 text-center col-4 col-md-2" value="{{ forloop.counter }}">{{ forloop.counter }} {{ ques.id }}</button>
+                                <input type="hidden" id="qid-by-tile-{{ forloop.counter }}" value="{{ ques.id }}">
+                            {% endfor %}
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.js" crossorigin="anonymous"></script>
+
+    {% include 'preview/ajax-fetch.html' %}
+    <script>
+        $(document).ready(function () {
+            document.getElementById("fullscreen-message").click();
+        });
+
+        let getFirstQuestionOnPageLoad;
+        getFirstQuestionOnPageLoad = () => {
+            let currentQuestion = document.querySelector(".currentQuestion").value;
+            document.getElementById('question-'+currentQuestion).classList.add('mark-current-tile')
+            document.getElementById('qid-' + currentQuestion).removeAttribute("hidden");
+        }
+        window.onload = getFirstQuestionOnPageLoad();
+
+        {#$(document).on('submit', '#question-response-form', function (e) {#}
+        {#    let questionId = $('input[name=questionIdName]').val();#}
+        {#    let sno = $('input[name=snoName]').val();#}
+        {#    let csrf = $('input[name=csrfmiddlewaretoken]').val();#}
+        {##}
+        {#    let selectedDetails = nextQuestion(questionId, sno);#}
+        {#    e.preventDefault();#}
+        {#    $.ajax({#}
+        {#        type: 'POST',#}
+        {#        url: '{% url "save-response" %}',#}
+        {#        data:#}
+        {#            {#}
+        {#                questionId: selectedDetails[0],#}
+        {#                selectedOptionId: selectedDetails[1],#}
+        {#                csrfmiddlewaretoken: csrf#}
+        {#            },#}
+        {#        success: function () {#}
+        {#        }#}
+        {#    })#}
+        {#});#}
+
+
+        document.onfullscreenchange = function (event) {
+            if (document.fullscreenElement === null) {
+                document.getElementById('warning-sound').play();
+                document.getElementById("fullscreen-enabler").removeAttribute("hidden");
+                document.getElementById("fullscreen-closer").hidden = true;
+                document.getElementById('fullscreen-popup').click();
+            } else {
+                document.getElementById("fullscreen-closer").removeAttribute("hidden");
+                document.getElementById("fullscreen-enabler").hidden = true;
+            }
+        };
+
+        function autoFullScreen() {
+            let elem = document.documentElement;
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen();
+            } else if (elem.webkitRequestFullscreen) { /* Safari */
+                elem.webkitRequestFullscreen();
+            } else if (elem.msRequestFullscreen) { /* IE11 */
+                elem.msRequestFullscreen();
+            }
+        }
+
+    </script>
+
+    <!-- fullscreen modal kept outside for more blur-->
+    <div class="warning-modal modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false"
+         tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="staticBackdropLabel">Modal title</h5>
+                </div>
+                <div class="modal-body">
+                    You will be disqualified from this exam if you exit fullscreen multiple times.
+                </div>
+                <div class="modal-footer">
+                    <button id="fullscreen-closer" type="button" class="btn-sm btn btn-danger" data-bs-dismiss="modal">I
+                        understand
+                    </button>
+                    <button id="fullscreen-enabler" onclick="autoFullScreen()" type="button"
+                            class="btn-sm btn btn-primary">Back to Fullscreen
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--  Basic instructions with blur effect -->
+    <div class="warning-modal modal fade" id="staticBackdrop1" data-bs-backdrop="static" data-bs-keyboard="false"
+         tabindex="-1" aria-labelledby="basic-instructions" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="basic-instructions">View in Fullscreen mode</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    You must be in Fullscreen mode to give this exam. Click on I agree to continue.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-sm btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button onclick="autoFullScreen()" type="button" class="btn-sm btn btn-primary">I agree</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

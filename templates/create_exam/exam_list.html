@@ -48,7 +48,7 @@
                         <div class="">
                             <a href="{% url 'view' exam.id %}"><h5 style="color: #7b666d">{{ exam.name }}</h5></a>
                             <ul style="color: slategrey">
-                                <li>Number of questions: 20</li>
+                                <li>Number of questions: {{ exam.examquestion_set.all.count }}</li>
                                 <li>Total time: {{ exam.duration }}</li>
                             </ul>
                         </div>
@@ -59,12 +59,12 @@
                                     Action
                                 </button>
                                 <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="{% url 'preview-one-by-one' exam.id %}">P One by One</a></li>
                                     <li><a class="dropdown-item" href="{% url 'preview-demo' exam.id %}">Preview</a></li>
                                     <li><a class="dropdown-item" href="#">Statistics</a></li>
                                     <li><a class="dropdown-item" href="#">Exam</a></li>
                                     <li><a class="dropdown-item" href="#">Settings</a></li>
                                     <li><a class="dropdown-item" href="#">Notify Results</a></li>
-
                                 </ul>
                             </div>
                         </div>

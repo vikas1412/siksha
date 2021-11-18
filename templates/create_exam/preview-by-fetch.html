@@ -1,6 +1,9 @@
 {% extends 'create_exam/plain_base.html' %}
 {% load static %}
 
+{% block disable_right_click %}oncontextmenu="return false;"{% endblock %}
+{% block disable_select_text %}onselectstart="return false"{% endblock %}
+
 {% block title %}
     {{ id }}
 {% endblock %}
@@ -17,67 +20,41 @@
 {% endblock %}
 
 {% block css %}
+    .modal-open .container-fluid, .modal-open  .container {
+    -webkit-filter: blur(9px) grayscale(90%);
+    }
+
 {% endblock %}
 
 {% block body %}
-    <div class="container">
-        <div class="row mt-4">
-            <div class="col-md-1 order-md-1 mb-4">
-                <a class="btn btn-outline-info" data-bs-toggle="offcanvas" href="#offcanvasExample" role="button"
-                   aria-controls="offcanvasExample">
-                    <i class="bi bi-blockquote-left"></i>
-                </a>
+    <div class="message">
+        <audio hidden id="click-sound" src="{% static 'sound/click.wav' %}">
+            <source src="{% static 'sound/click.wav' %}" type="audio/ogg">
+        </audio>
 
-                <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample"
-                     aria-labelledby="offcanvasExampleLabel">
-                    <div class="offcanvas-header">
-                        <h5 class="offcanvas-title" id="offcanvasExampleLabel">Instructions:</h5>
-                        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"
-                                aria-label="Close"></button>
-                    </div>
-                    <div class="offcanvas-body">
-                        <div>
-                            <ul>
-                                <li>Read each question carefully.</li>
-                                <li>You cannot skip a question. You must provide an answer to each question to proceed
-                                    with the test.
-                                </li>
-                                <li>Once answered, you cannot go back to a question. You will be given an opportunity to
-                                    review questions at the end of the test.
-                                </li>
-                                <li>If you exit the test, you will not be able to resume your place in the test. You
-                                    will have to start from the beginning.
-                                </li>
-                                <li>There may be tools available (i.e., glossary, calculator, etc.) to help you answer
-                                    the questions. You can access this information by clicking in the tools bar that may
-                                    be located above the questions.
-                                </li>
-                                <li>There may be support information that is required to answer the questions. You can
-                                    access this information by clicking on "Show Support Information" located in the
-                                    question box.
-                                </li>
-                                <li>Your test will not be timed. You can take as much time as you need to complete this
-                                    test. Please keep in mind, however, that the actual test that you take to gain
-                                    employment with the County of Los Angeles will be timed.
-                                </li>
-                                <li>This practice test was designed to build upon a basic understanding of the subject
-                                    area being tested. It was not intended to serve as the sole instruction method or
-                                    initial exposure to the subject area. Instead, it should serve as a refresher
-                                    mechanism in your examination preparation. If more in-depth training is required,
-                                    visit the Local Resources section of this site to locate colleges and organizations
-                                    that may provide additional training.
-                                </li>
-                                <li>For more detailed instructions, please visit our System Overview section.</li>
-                                <li>This test is only a guide. The test questions that you complete during your actual
-                                    employment test may vary in format, content, and level of difficulty.
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <audio hidden id="warning-sound" src="{% static 'sound/warning.wav' %}">
+            <source src="{% static 'sound/click.wav' %}" type="audio/ogg">
+        </audio>
+    </div>
+
+    <div class="supreme-container container">
+        <div class="row mt-4">
+            {% include 'create_exam/content/instructions.html' %}
+
             <div class="col-md-7 m-sm-auto order-md-2">
-            <button class="btn btn-outline-info" onclick="autoFullScreen()" value="FullScreen">FullScreen</button>
+
+                <!-- Enable full Screen popup alert -->
+                <button hidden id="fullscreen-popup" type="button" class="warning-modal btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+                    Force Full Screen
+                </button>
+
+                <!-- Fullscreen message -->
+                <button hidden id="fullscreen-message" type="button" class="warning-modal btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop1">
+                    Full screen
+                </button>
+
+                <br><br>
+
                 {% for question in questions %}
                     <form method="post" name="question-response-form" id="question-response-form">
                         {% csrf_token %}
@@ -131,10 +108,13 @@
                 <hr>
                 <div class="p-2">
                     <div class="row tileBox">
+                    <div class="">
                         {% for ques in exam.examquestion_set.all %}
                             <button onclick="getByNumber('{{ forloop.counter }}')" id="tile-{{ forloop.counter }}"
                                     class="questionTile border p-3 text-center col-4 col-md-2">{{ forloop.counter }}</button>
                         {% endfor %}
+
+                    </div>
                     </div>
                 </div>
             </div>
@@ -153,7 +133,12 @@
             {% endfor %}
         }
 
+        $(document).ready( function () {
+            document.getElementById("fullscreen-message").click();
+        });
+
         function getByNumber(currentNumber) {
+            document.getElementById('click-sound').play();
             hideAllQuestions();
             let currentTile = parseInt(currentNumber);
 
@@ -183,9 +168,7 @@
             let questionId = $('input[name=questionIdName]').val();
             let sno = $('input[name=snoName]').val();
             let csrf = $('input[name=csrfmiddlewaretoken]').val();
-            window.alert(csrf);
 
-            window.alert(questionId + " QID : SnoID " + sno);
             let selectedDetails = nextQuestion(questionId, sno);
             e.preventDefault();
             $.ajax({
@@ -196,13 +179,30 @@
                         questionId: selectedDetails[0],
                         selectedOptionId: selectedDetails[1],
                         csrfmiddlewaretoken: csrf
-                    }
-                //     ,
-                // success:function(){
-                //    alert('Saved');
-                // }
+                    },
+                success:function(){
+                }
             })
         });
+
+        document.onfullscreenchange = function ( event ) {
+            if (document.fullscreenElement === null) {
+                document.getElementById('warning-sound').play();
+                document.getElementById("fullscreen-enabler").removeAttribute("hidden");
+                document.getElementById("fullscreen-closer").hidden = true;
+                document.getElementById('fullscreen-popup').click();
+            }
+            else {
+                document.getElementById("fullscreen-closer").removeAttribute("hidden");
+                document.getElementById("fullscreen-enabler").hidden = true;
+            }
+
+        };
+        document.documentElement.onclick = function () {
+            // requestFullscreen() must be in an event handler or it will fail
+            // alert('requestfullscreen()')
+            document.documentElement.requestFullscreen();
+        }
 
         let getOneQuestionAtATime;
         getOneQuestionAtATime = () => {
@@ -211,10 +211,8 @@
             document.getElementById('question-' + currentQuestion).removeAttribute("hidden");
         }
 
-        let autoFullScreen;
-        autoFullScreen = () => {
-            window.alert("Please enable full screen");
-            var elem = document.documentElement;
+        function autoFullScreen () {
+            let elem = document.documentElement;
             if (elem.requestFullscreen) {
                 elem.requestFullscreen();
             } else if (elem.webkitRequestFullscreen) { /* Safari */
@@ -225,4 +223,41 @@
         }
         window.onload = getOneQuestionAtATime();
     </script>
+
+    <!-- fullscreen modal kept outside for more blur-->
+    <div class="warning-modal modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="staticBackdropLabel">Modal title</h5>
+                </div>
+                <div class="modal-body">
+                    You will be disqualified from this exam if you exit fullscreen multiple times.
+                </div>
+                <div class="modal-footer">
+                    <button id="fullscreen-closer" type="button" class="btn-sm btn btn-danger" data-bs-dismiss="modal">I understand</button>
+                    <button id="fullscreen-enabler" onclick="autoFullScreen()" type="button" class="btn-sm btn btn-primary">Back to Fullscreen</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{#    Basic instructions#}
+    <div class="warning-modal modal fade" id="staticBackdrop1" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="basic-instructions" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="basic-instructions">View in Fullscreen mode</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    You must be in Fullscreen mode to give this exam. Click on I agree to continue.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-sm btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button onclick="autoFullScreen()" type="button" class="btn-sm btn btn-primary">I agree</button>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}

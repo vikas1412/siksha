@@ -1,0 +1,119 @@
+<script type="application/javascript">
+
+    function markSelected(questionId) { // visited & attempted
+        let markForReview = document.getElementById('question-' + questionId);
+        markForReview.classList.add("mark-selected");
+    }
+
+    function markVisited(questionId) { // visited but unattempted
+        let markUnattempted = document.getElementById('question-' + questionId);
+        markUnattempted.classList.add("mark-visited");
+    }
+
+    function markCurrentTile(questionId) {
+        let markCurrentTile = document.getElementById('question-' + questionId);
+        markCurrentTile.classList.add("mark-current-tile");
+    }
+
+    function hideAllQuestions() {
+        let check_if_already_visited;
+        document.getElementsByClassName("questions").hidden = true;
+        {% for question in exam.examquestion_set.all %}
+            check_if_already_visited = document.getElementById('question-{{ question.id }}');
+            if (check_if_already_visited.classList.contains("mark-selected") || check_if_already_visited.classList.contains("mark-visited")) {
+            } else {
+                document.getElementById("qid-{{ forloop.counter }}").hidden = true;
+                document.getElementById('question-id-{{ question.id }}').style.backgroundColor = "#BCCDB817";
+                document.getElementById('question-id-{{ question.id }}').style.fontSize = "16px";
+                document.getElementById('question-id-{{ question.id }}').style.color = "black";
+            }
+        {% endfor %}
+    }
+
+    $(".question-tile").click(function () {
+        let questionId = $(this).attr('data-sid');
+        document.getElementById('click-sound').play();
+        document.getElementById('qid-'+questionId).removeAttribute("hidden");
+        markVisited(questionId);
+
+        let check_if_already_visited;
+        {% for question in exam.examquestion_set.all %}
+            check_if_already_visited = document.getElementById('question-{{ question.id }}');
+            if (check_if_already_visited.classList.contains("mark-selected")) {
+                document.getElementById('question-{{ question.id }}').classList.remove('mark-visited');
+
+            } else {
+                if (questionId !== {{ question.id }}) {
+                document.getElementById("qid-{{ question.id }}").hidden = true;
+                document.getElementById('question-id-{{ question.id }}').style.backgroundColor = "#BCCDB817";
+                document.getElementById('question-id-{{ question.id }}').style.fontSize = "16px";
+                document.getElementById('question-id-{{ question.id }}').style.color = "black";
+                }
+            }
+        {% endfor %}
+
+        // Green color to used on answered question "#1BBC9B"
+        document.getElementById('question-id-' + questionId).style.backgroundColor = "purple";
+        document.getElementById('question-id-' + questionId).style.color = "white";
+        document.getElementById('qid-'+questionId).removeAttribute("hidden");
+    });
+
+    function getByNumber(currentNumber) {
+        document.getElementById('click-sound').play();
+        hideAllQuestions();
+        let currentTile = parseInt(currentNumber);
+        document.getElementById('question-' + currentTile).removeAttribute("hidden");
+        // Green color to used on answered question "#1BBC9B"
+        document.getElementById('tile-' + currentTile).style.backgroundColor = "purple";
+        document.getElementById('tile-' + currentTile).style.color = "white";
+    }
+
+    function nextQ(questionId, sno) {
+        let currentQ = parseInt(sno);
+        let nextQ = currentQ + 1;
+
+        {#markCurrentTile()#}
+        document.getElementById('qid-' + questionId).hidden = true;
+        let qId = document.querySelector("#qid-by-tile-" + nextQ).value;
+        markCurrentTile(qId);
+
+        document.getElementById('qid-' + parseInt(qId)).removeAttribute("hidden");
+    }
+
+
+    $(".save-and-next-q").click(function () {
+        document.getElementById('click-sound').play();
+        let questionId = $(this).attr('data-sid');
+
+        let selectedOptionId = null;
+        let csrf = $('input[name=csrfmiddlewaretoken]').val();
+
+        // call nextQ to update UI for next question
+        let sno = document.getElementById("question-"+questionId).value;
+        nextQ(questionId, sno);
+
+        if (document.querySelector("input[name=" + CSS.escape(questionId) + '-option' + "]:checked")) {
+            // mark selected if answered
+            markSelected(questionId);
+            document.getElementById('question-'+questionId).classList.remove('mark-visited');
+            selectedOptionId = document.querySelector("input[name=" + CSS.escape(questionId) + '-option' + "]:checked").value;
+
+            let myData = {
+                questionId: questionId,
+                selectedOptionId: selectedOptionId,
+                csrfmiddlewaretoken: csrf
+            }
+            // Save response only if any option is selected.
+            $.ajax({
+                type: 'POST',
+                url: '{% url 'save-user-response' %}',
+                data: myData,
+                success: function (data) {
+                    if (data.status === 'Save') {
+                    }
+                }
+            })
+        } else
+            markVisited(questionId);
+    })
+</script>
