@@ -36,6 +36,11 @@
         border-top-left-radius: 12px;
         border-bottom-right-radius: 12px;
     }
+    #time-remaining {
+        width: 80px;
+        text-align: center;
+        height: 45px;
+    }
 {% endblock %}
 
 {% block body %}
@@ -116,7 +121,7 @@
             <div class="col-md-4 border m-sm-auto rounded order-md-3 mb-4">
                 <div class="d-flex p-2">
                     <p class="m-auto">Time Remaining: </p>
-                    <div id="time-remaining" class="ms-auto rounded border border-1 border-danger p-2"></div>
+                    <p id="time-remaining" class="ms-auto rounded border border-1 border-danger p-2"></p>
                 </div>
                 <hr>
                 <div class="p-2">

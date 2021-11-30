@@ -8,6 +8,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 
     path("exam/", include("create_exam.urls")),
+    path('accounts/', include('accounts.urls'), name="accounts"),
     path("", RedirectView.as_view(url="exam/", permanent=True)),
 
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 from django.views.generic import ListView
+from django.contrib.auth.decorators import login_required
 
 import create_exam.question_script
 from create_exam.forms import StudentRegistration
@@ -115,7 +116,7 @@ def add_user(request):
         else:
             return JsonResponse({'status': 0})
 
-
+@login_required
 def preview_one_by_one(request, id):
     exam = Exam.objects.get(id=id)
     all_question = ExamQuestion.objects.filter(exam_id=id)

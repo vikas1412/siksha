@@ -31,6 +31,7 @@
                             Action
                         </button>
                         <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'preview-one-by-one' exam.id %}">Preview</a>
                             <li><a class="dropdown-item" href="{% url 'delete-all-questions' exam.id %}">Delete all</a>
                             </li>
                             <li><a class="dropdown-item" href="{% url 'upload-questions-in-bulk' exam.id %}">Upload

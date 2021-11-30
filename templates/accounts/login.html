@@ -1,0 +1,41 @@
+{% extends 'create_exam/base.html' %}
+
+{% load static %}
+
+{% block setting %}active{% endblock %}
+
+{% block title %}
+Login | QComp.
+{% endblock %}
+
+{% block style %}
+
+{% endblock %}
+
+{% block body %}
+
+<div class="container mt-3 col-md-4">
+    <h4 class="page-header">
+        Student Login to QComp.
+    </h4>
+    <form method="post" action="{% url 'login' %}" class="row g-3 needs-validation" novalidate>
+        {% csrf_token %}
+        <div class="col-md-12">
+            <label for="validationCustom01" class="form-label">Username</label>
+            <input type="text" class="form-control" name="username" required>
+        </div>
+        <div class="col-md-12">
+            <label for="validationCustom01" class="form-label">Password</label>
+            <input type="password" class="form-control" name="password" required>
+        </div>
+
+        <div class="col-12">
+            <button class="btn btn-primary" type="submit">Login</button>
+        </div>
+        <div class="col-12">
+            <a class="other-links" href="">Forgot password?</a><br>
+            <a class="other-links" href="{% url 'signup' %}">Don't have an account?</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

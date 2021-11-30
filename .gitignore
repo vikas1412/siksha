@@ -3,3 +3,4 @@ siksha.iml
 __pycache__
 .git
 db.sqlite3
+.module-siksha

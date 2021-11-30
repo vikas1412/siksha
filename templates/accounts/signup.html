@@ -1,0 +1,60 @@
+{% extends 'create_exam/base.html' %}
+
+{% load static %}
+
+{% block setting %}active{% endblock %}
+
+{% block title %}
+Signup for free | QComp.
+{% endblock %}
+
+{% block body %}
+
+<h2 class="page-header">
+</h2>
+<div class="container mt-3 col-md-4">
+    <h4 class="page-header">
+        Signup up for free! QComp.
+    </h4>
+
+    <form method="post" action="{% url 'signup' %}" class="row g-3 needs-validation">
+        {% csrf_token %}
+
+        <div class="mt-4"></div>
+        <div class="col-md-6">
+            <label for="validationCustom01" class="form-label">First Name</label>
+            <input type="text" class="form-control" name="fname" required>
+        </div>
+        <div class="col-md-6">
+            <label for="validationCustom01" class="form-label">Last Name</label>
+            <input type="text" class="form-control" name="lname" required>
+        </div>
+
+
+        <div class="col-md-12">
+            <label for="validationCustom01" class="form-label">Username</label>
+            <input type="text" class="form-control" name="username" required>
+        </div>
+        <div class="col-md-12">
+            <label for="validationCustom01" class="form-label">Email</label>
+            <input type="text" class="form-control" name="email" required>
+        </div>
+        <div class="col-md-6">
+            <label for="validationCustom01" class="form-label">Enter Password</label>
+            <input type="text" class="form-control" name="pass1" required>
+        </div>
+        <div class="col-md-6">
+            <label for="validationCustom01" class="form-label">Confirm password</label>
+            <input type="text" class="form-control" name="pass2" required>
+        </div>
+
+        <div class="col-12">
+            <button class="btn btn-primary" type="submit">Login</button>
+        </div>
+        <div class="col-12">
+            <a class="other-links" href="">Forgot password?</a><br>
+            <a class="other-links" href="{% url 'login' %}">Already have an account?</a>
+        </div>
+    </form>
+</div>
+    {% endblock %}
