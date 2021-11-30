@@ -6,8 +6,13 @@ urlpatterns = [
     path("", views.home, name="home"),
 
     path('list-all/', ExamListView.as_view(), name='exam'),
-    path('<int:id>/p/one/', views.preview_one_by_one, name='preview-one-by-one'),
+
+    # Fetch all questions at once
     path('<int:id>/preview-demo/', views.preview_exam, name='preview-demo'),
+
+    # Fetch one by one using AJAX
+    path('<int:id>/fetch-by-one/', views.preview_one_by_one, name='preview-one-by-one'),
+
     path('save-response/', views.save_user_response, name="save-user-response"),
 
     path('<int:id>/view/', views.view_exam, name='view'),
@@ -21,4 +26,3 @@ urlpatterns = [
 
     path('add-user/', views.add_user, name="add-user"),
 ]
-

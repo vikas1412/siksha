@@ -45,3 +45,14 @@ class UserInfo(models.Model):
 
     def __str__(self):
         return self.email
+
+
+class SaveExamFinish(models.Model):
+    exam = models.ForeignKey("Exam", on_delete=models.SET_NULL, null=True)
+    user = models.ForeignKey(User, models.SET_NULL, null=True)
+    has_finished = models.BooleanField(default=False)
+    timestamp = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    student_exam_duration = models.DurationField(null=True, blank=True)
+    total_questions = models.IntegerField()
+    correct = models.IntegerField()
+    incorrect = models.IntegerField()

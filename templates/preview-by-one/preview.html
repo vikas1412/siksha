@@ -56,15 +56,17 @@
             <div id="action-buttons" class="col-md-7 m-sm-auto order-md-2">
 
                 {# Commenting it for development work#}
-                <!-- Enable full Screen popup alert -->
-                <button hidden id="fullscreen-popup" type="button" class="warning-modal" data-bs-toggle="modal"
-                        data-bs-target="#staticBackdrop">
-                </button>
 
-                <!-- Fullscreen message -->
-                <button hidden id="fullscreen-message" type="button" class="warning-modal" data-bs-toggle="modal"
-                        data-bs-target="#staticBackdrop1">
-                </button>
+                <!-- Enable full Screen popup alert -->
+{#                <button hidden id="fullscreen-popup" type="button" class="warning-modal" data-bs-toggle="modal"#}
+{#                        data-bs-target="#staticBackdrop">#}
+{#                </button>#}
+{##}
+{#                <!-- Fullscreen message -->#}
+{#                <button hidden id="fullscreen-message" type="button" class="warning-modal" data-bs-toggle="modal"#}
+{#                        data-bs-target="#staticBackdrop1">#}
+{#                </button>#}
+
 
                 {% for question in questions %}
                     <form method="post" name="question-response-form" id="question-response-form">

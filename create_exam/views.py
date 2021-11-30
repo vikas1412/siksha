@@ -116,13 +116,13 @@ def add_user(request):
             return JsonResponse({'status': 0})
 
 
-def preview_one_by_one(request, exam_id):
-    exam = Exam.objects.get(id=exam_id)
-    all_question = ExamQuestion.objects.filter(exam_id=exam_id)
+def preview_one_by_one(request, id):
+    exam = Exam.objects.get(id=id)
+    all_question = ExamQuestion.objects.filter(exam_id=id)
     options = QuestionOption.objects.all()
     params = {
         'exam': exam,
         'questions': all_question,
         'options': options,
     }
-    return render(request, 'preview-one/preview.html', params)
+    return render(request, 'preview-by-one/preview.html', params)
