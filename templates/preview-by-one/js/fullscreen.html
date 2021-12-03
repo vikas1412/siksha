@@ -1,0 +1,36 @@
+<script>
+    $(document).ready(function () {
+        document.getElementById("fullscreen-message").click();
+    });
+
+    let getFirstQuestionOnPageLoad;
+    getFirstQuestionOnPageLoad = () => {
+        let currentQuestion = document.querySelector(".currentQuestion").value;
+        document.getElementById('question-'+currentQuestion).classList.add('mark-current-tile')
+        document.getElementById('qid-' + currentQuestion).removeAttribute("hidden");
+    }
+    window.onload = getFirstQuestionOnPageLoad();
+
+    document.onfullscreenchange = function (event) {
+        if (document.fullscreenElement === null) {
+            document.getElementById('warning-sound').play();
+            document.getElementById("fullscreen-enabler").removeAttribute("hidden");
+            document.getElementById("fullscreen-closer").hidden = true;
+            document.getElementById('fullscreen-popup').click();
+        } else {
+            document.getElementById("fullscreen-closer").removeAttribute("hidden");
+            document.getElementById("fullscreen-enabler").hidden = true;
+        }
+    };
+
+    function autoFullScreen() {
+        let elem = document.documentElement;
+        if (elem.requestFullscreen) {
+            elem.requestFullscreen();
+        } else if (elem.webkitRequestFullscreen) { /* Safari */
+            elem.webkitRequestFullscreen();
+        } else if (elem.msRequestFullscreen) { /* IE11 */
+            elem.msRequestFullscreen();
+        }
+    }
+</script>

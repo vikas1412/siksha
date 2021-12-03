@@ -47,7 +47,7 @@ class UserInfo(models.Model):
         return self.email
 
 
-class SaveExamFinish(models.Model):
+class ExamReport(models.Model):
     exam = models.ForeignKey("Exam", on_delete=models.SET_NULL, null=True)
     user = models.ForeignKey(User, models.SET_NULL, null=True)
     has_finished = models.BooleanField(default=False)

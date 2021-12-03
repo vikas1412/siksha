@@ -1,4 +1,4 @@
-{% extends 'create_exam/plain_base.html' %}
+{% extends 'create_exam/base.html' %}
 {% load static %}
 {% load shuffle %}
 
@@ -15,6 +15,11 @@
 {% endblock %}
 
 {% block timefield %}
+{% endblock %}
+
+{% block style %}
+    selected-option {
+    }
 {% endblock %}
 
 {% block body %}
@@ -39,21 +44,23 @@
                         </ul>
                     </div>
                 </div>
+                {% if questions.count == 0 %}
+                    <p>Currently there are no questions. Select an option to add options.</p>
+            {% endif %}
 
                 {% for question in questions %}
                     <div class="d-flex justify-content-between">
                         <div class="">
-                            <a><h5 style="color: #7b666d"><span
+                            <a><p style="color: #7b666d"><span
                                     style="color: darkgrey; padding-right: 4px">{{ forloop.counter }}.</span>{{ question.question }}
-                            </h5></a>
+                            </p></a>
                             <ul style="color: slategrey">
-
 
                                 {% for option in question.questionoption_set.all|shuffle %}
                                     <div class="form-check">
                                         <input class="form-check-input"
                                             {% if option.correctness == True %}
-                                               checked disabled
+                                               checked
                                             {% else %}
                                                disabled
                                             {% endif %}

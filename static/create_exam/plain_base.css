@@ -12,5 +12,6 @@ html {
     max-height: 400px;
     overflow: scroll;
     min-height: 400px;
-    min-width: 100%;
+    min-widtfh: 100%;
+    width: 100px;
 }

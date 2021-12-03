@@ -44,7 +44,7 @@ def preview_exam(request, id):
         'questions': all_question,
         'options': options,
     }
-    return render(request, 'preview/preview.html', params)
+    return render(request, 'preview-by-one/preview.html', params)
 
 
 def delete_all(request, id):
@@ -115,6 +115,7 @@ def add_user(request):
             return JsonResponse({'status': 'Save', 'users': list(users)})
         else:
             return JsonResponse({'status': 0})
+
 
 @login_required
 def preview_one_by_one(request, id):
