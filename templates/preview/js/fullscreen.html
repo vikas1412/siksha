@@ -1,0 +1,28 @@
+<script>
+    $(document).ready(function () {
+        document.getElementById("fullscreen-message").click();
+    });
+
+    document.onfullscreenchange = function (event) {
+        if (document.fullscreenElement === null) {
+            document.getElementById('warning-sound').play();
+            document.getElementById("fullscreen-enabler").removeAttribute("hidden");
+            document.getElementById("fullscreen-closer").hidden = true;
+            document.getElementById('fullscreen-popup').click();
+        } else {
+            document.getElementById("fullscreen-closer").removeAttribute("hidden");
+            document.getElementById("fullscreen-enabler").hidden = true;
+        }
+    };
+
+    function autoFullScreen() {
+        let elem = document.documentElement;
+        if (elem.requestFullscreen) {
+            elem.requestFullscreen();
+        } else if (elem.webkitRequestFullscreen) { /* Safari */
+            elem.webkitRequestFullscreen();
+        } else if (elem.msRequestFullscreen) { /* IE11 */
+            elem.msRequestFullscreen();
+        }
+    }
+</script>

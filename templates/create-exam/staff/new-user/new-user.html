@@ -1,0 +1,85 @@
+{% extends 'create-exam/base.html' %}
+
+{% load static %}
+
+{% block user_info %}active{% endblock %}
+
+{% block title %}
+    User Info
+{% endblock %}
+
+{% block style %}
+{% endblock %}
+
+{% block body %}
+    <div class="mt-3 container">
+        <h3>User info</h3>
+    </div>
+    <div class="container">
+        <div class="row mt-4">
+            <div class="col-md-3 order-md-1 mb-4">
+                <div class="list-group">
+                    <a href="#" class="list-group-item list-group-item-action active" aria-current="true">
+                        Create user
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action">
+                        <form action="" method="post">
+                        <p id="message" style="color: #ff6146"></p>
+                            {% csrf_token %}
+                            <label for="fullname">Fullname:</label>
+                            <input type="text" name="fullname"
+                                   class="form-control" id="fullname"
+                                   maxlength="200" required>
+                            <label for="fullname">Username:</label>
+                            <input type="text" name="username"
+                                   class="form-control" id="username"
+                                   maxlength="200" required>
+                            <label for="email">Email:</label>
+                            <input type="text" name="email" class="form-control"
+                                   id="email" maxlength="200" required>
+                            <input type="button" id="new_user_create" class="mt-3 btn-sm btn btn-outline-primary"
+                                   value="Add user">
+                        </form>
+                    </a>
+                </div>
+            </div>
+            <div class="col-md-9 order-md-2">
+                <table class="table table-hover">
+                    <thead>
+                    <tr>
+                        <th scope="col">Enterprise ID</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Username</th>
+                        <th scope="col">Action</th>
+                    </tr>
+                    </thead>
+                    <tbody id="tbody-new-user">
+                    {% for user in users %}
+                        <tr>
+                            <td class="col-4">{{ user.email }}</td>
+                            <td>{{ user.first_name }}</td>
+                            <td>{{ user.username }}</td>
+                            <td>
+                                <input type="button" value="Edit" data-sid="{{ user.id }}"
+                                       class="btn btn-warning btn-sm btn-edit">
+                                <input type="button" value="Delete" data-sid="{{ user.id }}"
+                                       class="btn btn-danger btn-sm btn-delete">
+                                <input type="hidden" value="{{ user.id }}" id="current_id">
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    {% include 'create-exam/staff/new-user/ajax-user-save.html' %}
+{% endblock %}
+
+
+<!-- Option 1: Bootstrap Bundle with Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

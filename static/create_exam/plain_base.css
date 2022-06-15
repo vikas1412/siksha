@@ -2,16 +2,16 @@ html {
     /*overflow-y: hidden;*/
 }
 
-.questionTile {
-    padding: 12px;
+.question-tile {
+    padding: 122px;
     background-color: rgba(188,205,184,0.09);
 }
 
 .tileBox {
+    margin: 10px;
     height: 100%;
     max-height: 400px;
     overflow: scroll;
     min-height: 400px;
-    min-widtfh: 100%;
-    width: 100px;
+    min-width: 100%;
 }

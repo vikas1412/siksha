@@ -1,4 +1,4 @@
-{% extends 'create_exam/plain_base.html' %}
+{% extends 'create-exam/plain_base.html' %}
 {% load static %}
 
 {% block disable_right_click %}oncontextmenu="return false;"{% endblock %}
@@ -25,47 +25,45 @@
     }
 
     .mark-selected {
-        background-color: #33b864;
+    background-color: #33b864;
+    border-top-left-radius: 22px;
+    border-top-right-radius: 22px;
+
     }
     .mark-visited {
-        background-color: #ff7f7f;
+    background-color: #ff7f7f;
+    }
+    .mark-for-review {
+    background-color: #ff3f4f;
     }
     .mark-current-tile {
-        color: #ff7f7f;
-        background-color: #374f6b;
-        border-top-left-radius: 12px;
-        border-bottom-right-radius: 12px;
+    color: #ff7f7f;
+    background-color: #374f6b;
+    border-top-left-radius: 12px;
+    border-bottom-right-radius: 12px;
     }
+    #time-remaining {
+    width: 80px;
+    text-align: center;
+    height: 45px;
+    }
+    .scrollbar-thin {
+    scrollbar-width: thin;
+    overflow-y: scroll;
+    }
+
 {% endblock %}
 
 {% block body %}
-    <div class="message">
-        <audio hidden id="click-sound" src="{% static 'sound/click.wav' %}">
-            <source src="{% static 'sound/click.wav' %}" type="audio/ogg">
-        </audio>
-
-        <audio hidden id="warning-sound" src="{% static 'sound/warning.wav' %}">
-            <source src="{% static 'sound/click.wav' %}" type="audio/ogg">
-        </audio>
-    </div>
+    {% include 'preview/sound/exam-sound.html' %}
 
     <div class="supreme-container container">
         <div class="row mt-4">
-            {% include 'create_exam/content/instructions.html' %}
+            {% include 'create-exam/content/instructions.html' %}
+            {% include 'preview/screen/fullscreen.html' %}
 
-            <div id="action-buttons" class="col-md-7 m-sm-auto order-md-2">
-
-                {# Commenting it for development work#}
-                <!-- Enable full Screen popup alert -->
-                <button hidden id="fullscreen-popup" type="button" class="warning-modal" data-bs-toggle="modal"
-                        data-bs-target="#staticBackdrop">
-                </button>
-
-                <!-- Fullscreen message -->
-                <button hidden id="fullscreen-message" type="button" class="warning-modal" data-bs-toggle="modal"
-                        data-bs-target="#staticBackdrop1">
-                </button>
-
+{#            <div id="action-buttons" class="col-md-7 m-sm-auto order-md-2">#}
+            <div id="action-buttons" class="col-md-7 mt-3 order-md-3">
                 {% for question in questions %}
                     <form method="post" name="question-response-form" id="question-response-form">
                         {% csrf_token %}
@@ -76,106 +74,89 @@
                             <input class="currentQuestion" id="{{ question.id }}" type="hidden"
                                    value="{{ question.id }}">
 
-                            <div class="d-flex justify-content-between">
-                                <div class="">
-                                    <div class="d-flex justify-content-around">
-                                        <span class="serial-no">{{ forloop.counter }}. </span>
-                                        <h5 style="color: #7b666d">{{ question.question }}</h5>
+                            <div class="d-flex align-items-start flex-column">
+                                <div class="mb-auto p-1">
+                                    <div class="">
+                                        <div class="d-flex justify-content-start">
+                                            <span class="serial-no">{{ forloop.counter }}. </span>
+                                            <h5 style="color: #7b666d">{{ question.question }}</h5>
+                                        </div>
+                                        <ul class="question-tag">
+                                            {% for option in question.questionoption_set.all %}
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio"
+                                                           name="{{ question.id }}-option"
+                                                           id="{{ question.id }}-option-{{ forloop.counter }}"
+                                                           value="{{ option.id }}">
+                                                    <label class="form-check-label"
+                                                           for="{{ question.id }}-option-{{ forloop.counter }}">
+                                                        {{ option.option }}
+                                                    </label>
+                                                </div>
+                                            {% endfor %}
+                                        </ul>
                                     </div>
-                                    <ul class="question-tag">
-                                        {% for option in question.questionoption_set.all %}
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="radio"
-                                                       name="{{ question.id }}-option"
-                                                       id="{{ question.id }}-option-{{ forloop.counter }}"
-                                                       value="{{ option.id }}">
-                                                <label class="form-check-label"
-                                                       for="{{ question.id }}-option-{{ forloop.counter }}">
-                                                    {{ option.option }}
-                                                </label>
-                                            </div>
-                                        {% endfor %}
-                                    </ul>
                                 </div>
-                            </div>
-                            <div class="d-grid gap-2 d-md-block">
-                                <input class="btn btn-outline-warning btn-sm" type="button" value="Mark for review">
-                                <input class="btn btn-outline-info btn-sm save-and-next-q" data-sid="{{ question.id }}"
-                                       type="button"
-                                       value="Save & Next">
+                                <div class="gap-1 p-md-3 ml-auto d-md-block">
+                                    <input class="btn btn-outline-primary btn-sm" type="button" value="Clear">
+                                    <input class="btn btn-outline-warning btn-sm" type="button" value="Mark for review">
+                                    <input class="btn btn-outline-info btn-sm save-and-next-q"
+                                           data-sid="{{ question.id }}"
+                                           type="button"
+                                           value="Save & Next">
+                                </div>
                             </div>
                         </div>
                     </form>
                 {% endfor %}
             </div>
 
+            {# Using below line to save duration in db#}
             <input type="hidden" value="{{ exam.duration }}" id="duration">
 
-            <div class="col-md-4 border m-sm-auto rounded order-md-3 mb-4">
-                <div class="d-flex p-2">
-                    <p class="m-auto">Time Remaining: </p>
-                    <div id="time-remaining" class="ms-auto rounded border border-1 border-danger p-2"></div>
+
+            <div class="col-md-4 m-sm-auto rounded order-md-4 mb-0">
+                <div class="mb-3 mt-3 col-12 justify-content-center d-flex">
+                    <span class="p-2">Time Remaining: <span id="time-remaining"
+                                                            class="ms-auto rounded border border-2 border-danger p-2">0:00:00</span></span>
+
+                    <!-- Button trigger modal -->
+                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#submit-modal">
+                        Submit Test
+                    </button>
                 </div>
-                <hr>
-                <div class="p-2">
-                    <div class="row tileBox">
-                        <div class="">
-                            {% for ques in exam.examquestion_set.all %}
-                                <input id="question-{{ ques.id }}" class="question-tile border p-3 text-center col-4 col-md-2" data-sid="{{ ques.id }}"
-                                       type="button" value="{{ forloop.counter }}">
+
+                <div class="list-group">
+                    <a class="list-group-item list-group-item-action active" aria-current="true">
+                        Quantitative Reasoning
+                    </a>
+                    <a class="p-0 list-group-item">
+                        <div style="overflow-x: hidden" class="scrollbar-thin row tileBox">
+                            <div>
+                                {% for ques in exam.examquestion_set.all %}
+                                    <input id="question-{{ ques.id }}" style="margin: 2px"
+                                           class="question-tile text-center border p-3 pl-1 pr-1 col-2 col-md-2"
+                                           data-sid="{{ ques.id }}"
+                                           type="button" value="{{ forloop.counter }}">
 
 
-                                 {# removing the below button is breaking the code functionality. #}
-                                <button hidden id="question-id-{{ ques.id }}"
-                                        class="question-{{ forloop.counter }} tile-{{ forloop.counter }} questionTile border p-3 text-center col-4 col-md-2" value="{{ forloop.counter }}">{{ forloop.counter }} {{ ques.id }}</button>
-                                <input type="hidden" id="qid-by-tile-{{ forloop.counter }}" value="{{ ques.id }}">
-                            {% endfor %}
+                                    {# removing the below button is breaking the code functionality. #}
+                                    <button hidden id="question-id-{{ ques.id }}"
+                                            class="question-{{ forloop.counter }} tile-{{ forloop.counter }} questionTile border p-3 text-center col-4 col-md-2"
+                                            value="{{ forloop.counter }}">{{ forloop.counter }} {{ ques.id }}</button>
+                                    <input type="hidden" id="qid-by-tile-{{ forloop.counter }}" value="{{ ques.id }}">
+                                {% endfor %}
+                            </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
             </div>
         </div>
     </div>
     <script src="https://code.jquery.com/jquery-3.5.1.js" crossorigin="anonymous"></script>
 
-    {% include 'preview/ajax-fetch.html' %}
-    <script>
-        $(document).ready(function () {
-            document.getElementById("fullscreen-message").click();
-        });
-
-        let getFirstQuestionOnPageLoad;
-        getFirstQuestionOnPageLoad = () => {
-            let currentQuestion = document.querySelector(".currentQuestion").value;
-            document.getElementById('question-'+currentQuestion).classList.add('mark-current-tile')
-            document.getElementById('qid-' + currentQuestion).removeAttribute("hidden");
-        }
-        window.onload = getFirstQuestionOnPageLoad();
-
-        document.onfullscreenchange = function (event) {
-            if (document.fullscreenElement === null) {
-                document.getElementById('warning-sound').play();
-                document.getElementById("fullscreen-enabler").removeAttribute("hidden");
-                document.getElementById("fullscreen-closer").hidden = true;
-                document.getElementById('fullscreen-popup').click();
-            } else {
-                document.getElementById("fullscreen-closer").removeAttribute("hidden");
-                document.getElementById("fullscreen-enabler").hidden = true;
-            }
-        };
-
-        function autoFullScreen() {
-            let elem = document.documentElement;
-            if (elem.requestFullscreen) {
-                elem.requestFullscreen();
-            } else if (elem.webkitRequestFullscreen) { /* Safari */
-                elem.webkitRequestFullscreen();
-            } else if (elem.msRequestFullscreen) { /* IE11 */
-                elem.msRequestFullscreen();
-            }
-        }
-
-    </script>
+    {% include 'preview/js/functions.html' %}
+    {% include 'preview/js/fullscreen.html' %}
 
     <!-- fullscreen modal kept outside for more blur-->
     <div class="warning-modal modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false"
@@ -189,7 +170,8 @@
                     You will be disqualified from this exam if you exit fullscreen multiple times.
                 </div>
                 <div class="modal-footer">
-                    <button id="fullscreen-closer" type="button" class="btn-sm btn btn-danger" data-bs-dismiss="modal">I
+                    <button id="fullscreen-closer" type="button" class="btn-sm btn btn-danger"
+                            data-bs-dismiss="modal">I
                         understand
                     </button>
                     <button id="fullscreen-enabler" onclick="autoFullScreen()" type="button"
@@ -215,6 +197,31 @@
                 <div class="modal-footer">
                     <button type="button" class="btn-sm btn btn-secondary" data-bs-dismiss="modal">Close</button>
                     <button onclick="autoFullScreen()" type="button" class="btn-sm btn btn-primary">I agree</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Submit exam-->
+    <div class="modal fade" id="submit-modal" tabindex="-1" aria-labelledby="submit-modal-label" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="submit-modal-label">End Exam</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to end exam?
+                </div>
+                <div class="modal-footer">
+                    <form action="{% url 'submit-exam' exam.id %}" method="post" name="submit-exam">
+                        {% csrf_token %}
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Go Back</button>
+
+                        <input type="hidden" name="has-finished" value="True">
+                        <input type="time" hidden name="exam-duration">
+                        <input type="submit" class="btn btn-danger btn-sm" value="End Exam">
+                    </form>
                 </div>
             </div>
         </div>

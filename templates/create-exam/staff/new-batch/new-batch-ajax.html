@@ -1,0 +1,32 @@
+<script>
+    $("#new-batch-save").click(function () {
+        let output = '';
+        let batch = $("#id_batch").val();
+        let status = $("#id_status").val();
+        let users = $("#id_users").val();
+        let exam = $("#id_exam").val();
+        let csrf = $("input[name=csrfmiddlewaretoken]").val();
+
+        let myData = {
+            batch: batch,
+            status: status,
+            users: JSON.stringify(users),
+            exam: exam,
+            csrfmiddlewaretoken: csrf,
+        }
+
+        $.ajax({
+            url: "{% url 'new-batch' %}",
+            method: "POST",
+            data: myData,
+            success: function (data) {
+                alert('success');
+                document.getElementById("batch-error").innerHTML = data.error;
+
+            },
+            error: function (error) {
+                alert('error')
+            }
+        })
+    })
+</script>

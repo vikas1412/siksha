@@ -7,5 +7,6 @@
 
 .serial-no {
     color: darkgrey;
-    padding-right: 4px;
+    padding-right: 7px;
+    font-size: 17px;
 }

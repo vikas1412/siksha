@@ -1,0 +1,68 @@
+<script>
+    $("#new-exam-save").click(function () {
+        let output = '';
+        let name = $("#name").val();
+        let date = $("#date").val();
+        let duration = $("#id_duration").val();
+        let instructions = $("#instructions").val();
+        let csrf = $('input[name=csrfmiddlewaretoken]').val();
+        let myData = {
+            name: name,
+            date: date,
+            duration: duration,
+            instructions: instructions,
+            csrfmiddlewaretoken: csrf,
+        }
+        $.ajax({
+            url: "{% url 'new-exam' %}",
+            method: "POST",
+            data: myData,
+            success: function (data) {
+                if (data.status === "save") {
+                    let usersData = data.exam_list;
+                    for (i = 0; i < usersData.length; i++) {
+                        let urlPreview = '{% url 'preview-one-by-one' 0 %}'.replace('0', usersData[i].id);
+                        let urlViewExamDetail = "{% url 'view' 0 %}".replace('0', usersData[i].id);
+                        let noOfQuestions = usersData[i].no_of_questions;
+                        let duration = usersData[i].duration.replace('P0DT0', '').replace("H", ":").replace("M", ":").replace("S", "");
+
+                        output += "<tr>" +
+                            "<td><a class='common-link' href='" + urlViewExamDetail + "'>" + usersData[i].name + "</a></td>" +
+                            "<td>" + duration + "</td>" +
+                            "<td>" + noOfQuestions + "</td>" +
+                            "<td>" +
+                            "<div>" +
+                            "<div class='btn-group'>" +
+                            "<button type='button' class='btn btn-outline-primary " +
+                            "btn-sm p-1 dropdown-toggle' data-bs-toggle='dropdown' " +
+                            "aria-expanded='false'> " +
+                            "Action" +
+                            "</button>" +
+                            "<ul class='dropdown-menu'>" +
+                            "<li><a class='dropdown-item' href='" + urlPreview + "'>Preview</a></li>" +
+
+                            "<li><a class='dropdown-item' href='#'>Statistics</a></li>" +
+                            "<li><a class='dropdown-item' href='#'>Exam</a></li>" +
+                            "<li><a class='dropdown-item' href='#'>Settings</a></li>" +
+                            "<li><a class='dropdown-item' href='#'>Notify Results</a></li>" +
+                            "</ul>" +
+                            "</div>" +
+                            "</div>" +
+                            "</td>" +
+                            "</tr>";
+                    }
+                    $("#tbodyExam").html(output);
+
+                    {#$("form")[0].reset();#}
+                    $("#close-exam-modal").click();
+                } else if (data.status === 0) {
+                    console.log("Unable to save data.");
+                }
+            },
+            error: function () {
+                alert('not saved')
+                console.log('Error occurred.');
+            }
+        })
+    });
+</script>

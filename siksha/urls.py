@@ -9,6 +9,8 @@ urlpatterns = [
 
     path("exam/", include("create_exam.urls")),
     path('accounts/', include('accounts.urls'), name="accounts"),
+    path('exam/batches/', include('batch.urls'), name="batch"),
+
     path("", RedirectView.as_view(url="exam/", permanent=True)),
 
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

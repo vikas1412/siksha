@@ -1,3 +1,5 @@
+
+
 from django.contrib import messages
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
@@ -46,7 +48,7 @@ def logout(request):
         messages.warning(
             request, "You have successfully been logged out of your account.")
         return redirect('home')
-    return render(request, 'create_exam/index.html')
+    return render(request, 'create_exam/home.html')
 
 
 def signup(request):
@@ -56,27 +58,21 @@ def signup(request):
         last_name = request.POST['lname']
         username = request.POST['username']
         pass1 = request.POST['pass1']
-        pass2 = request.POST['pass2']
 
-        if pass1 == pass2:
-            try:
-                user = User.objects.get(username=username)
-                messages.warning(request, "User already exist with the username you enetered.")
-                redirect('signup')
-            except User.DoesNotExist:
-                new_user = User.objects.create_user(username, email, pass1)
-                new_user.first_name = first_name
-                new_user.last_name = last_name
+        try:
+            user = User.objects.get(username=username)
+            messages.warning(request, "User already exist with the username you enetered.")
+            redirect('signup')
+        except User.DoesNotExist:
+            new_user = User.objects.create_user(username, email, pass1)
+            new_user.first_name = first_name
+            new_user.last_name = last_name
 
-                curr_user = authenticate(username=username, password=pass1)
-                if curr_user is not None:
-                    login_auth(request, curr_user)
-                messages.success(
-                    request, f"Welcome to QComp. {first_name} {last_name}. Now you can take quiz.")
-                return redirect('home')
-
-        else:
-            messages.success(request, f"Passwords do not match. Please enter correct passwords.")
-            redirect("signup")
+            curr_user = authenticate(username=username, password=pass1)
+            if curr_user is not None:
+                login_auth(request, curr_user)
+            messages.success(
+                request, f"Welcome to QComp. {first_name} {last_name}. Now you can take quiz.")
+            return redirect('home')
 
     return render(request, 'accounts/signup.html')
