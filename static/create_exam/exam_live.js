@@ -33,7 +33,7 @@ getExamTime = () => {
         if (remainingTime <= 0) {
             clearInterval(time_remaining);
             document.getElementById("time-remaining").innerHTML = "Time Expired!";
-            window.location.replace('http://localhost:9000/exam/');
+            window.location.replace('http://localhost:8000/exam/');
         }
     }, 1000);
     const durationDate = new Date("duration");

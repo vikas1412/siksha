@@ -4,7 +4,7 @@ from create_exam.models import Exam, ExamQuestion, QuestionOption
 
 def upload_new_questions(exam_id):
     questions = create_exam.bulk_questions.questions
-    for i in range(len(questions['results'])):
+    for i in range(len(questions['results'])-40):
         ques = questions['results'][i]['question']
         o1 = questions['results'][i]['incorrect_answers'][0]
         o2 = questions['results'][i]['incorrect_answers'][1]
@@ -12,7 +12,8 @@ def upload_new_questions(exam_id):
         o4 = questions['results'][i]['correct_answer']
 
         ex = Exam.objects.get(id=exam_id)
-        new_q = ExamQuestion(exam=ex, question=ques)
+        batch_obj = ex.batch
+        new_q = ExamQuestion(exam=ex, question=ques, batch=ex.batch)
         new_q.save()
         QuestionOption(question=new_q, option=o1).save()
         QuestionOption(question=new_q, option=o2).save()

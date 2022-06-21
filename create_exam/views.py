@@ -66,17 +66,15 @@ def delete_all(request, exam_id):
 
 @login_required
 def save_response(request):
+    # return HttpResponse("Using")
     question_id = request.POST.get('questionId')
     selected_option_id = request.POST.get('selectedOptionId')
 
     question = ExamQuestion.objects.get(id=question_id)
     response = QuestionOption.objects.get(id=selected_option_id)
 
-    user_response = UserResponse(question=question, user=request.user, selectedOption=response)
-    print(user_response)
+    user_response = UserResponse(question=question, batch=question.batch, user=request.user, selectedOption=response)
     user_response.save()
-
-    print(question.question, "\n", response.option)
 
     return render(request, 'create-exam/home.html')
 
@@ -96,6 +94,7 @@ def save_user_response(request):
         time_remaining = request.POST.get('timeRemaining', 'None')
 
         exam_obj = Exam.objects.get(id=question_object.exam.id)
+        batch_obj = Batch.objects.get(batch=exam_obj.batch)
 
         # Save remaining time after answer selected
         time_list = time_remaining.split(":")
@@ -119,14 +118,14 @@ def save_user_response(request):
         else:
             pass
 
-        if_already_answered = UserResponse.objects.filter(question_id=question_object.id, user=request.user).exists()
+        if_already_answered = UserResponse.objects.filter(batch=batch_obj, question_id=question_object.id, user=request.user).exists()
 
         if if_already_answered is True:
             existing_record = UserResponse.objects.get(question_id=question_object.id, user=request.user)
             existing_record.selectedOption = response_object
             existing_record.save()
         else:
-            user_response = UserResponse(question=question_object, user=request.user, selectedOption=response_object)
+            user_response = UserResponse(batch=batch_obj, question=question_object, user=request.user, selectedOption=response_object)
             user_response.save()
         return JsonResponse({'status': 'Save'})
 
@@ -189,9 +188,7 @@ def preview_one_by_one(request, exam_id):
 
     # batch_obj = Batch.objects.get(batch=exam.batch)
     if not ExamReport.objects.filter(exam=exam, user=request.user).exists():
-        new_exam_report_prepare = ExamReport(exam=exam, user=request.user, has_started=True,
-                                             total_questions=all_question.count(), correct=0, incorrect=0, unattempted=0,
-                                             student_exam_duration_remaining=exam.duration, has_finished=False)
+        new_exam_report_prepare = ExamReport(exam=exam, user=request.user, has_started=True, student_exam_duration_remaining=exam.duration, has_finished=False)
         new_exam_report_prepare.save()
     params = {
         'exam': exam,
@@ -215,21 +212,22 @@ def submit_exam(request, exam_id):
         exam = Exam.objects.get(id=exam_id)
         user_response = UserResponse.objects.filter(user=request.user)
 
-        user = request.user.username
+        user = request.user
         has_finished = request.POST['has-finished']
-        student_exam_duration = '00:30:00'
-        batch = ''
+        has_started = request.POST['has-started']
+
+        batch_name = request.POST['batch-name']
+        batch_obj = exam.batch
+        
+        student_exam_duration = datetime.timedelta(days=0, seconds=int(200))
         total_questions = 10
         correct = 0
         incorrect = 0
         unattempted = 0
-        print(user_response)
-        # batch_obj = Batch.objects.get(exam=exam)
-        # user_response = UserResponse.objects.filter(user=user, batch=batch_obj)
-        #
-        # exam_report_object = ExamReport(exam=exam, user=user, has_finished=has_finished,
-        #                                 student_exam_duration=student_exam_duration, batch=batch,
-        #                                 total_questions=total_questions, correct=correct, incorrect=incorrect)
+
+        exam_report_object = ExamReport(batch=batch_obj, exam=exam, user=user, has_started=has_started, has_finished=has_finished,
+                                        student_exam_duration_remaining=student_exam_duration)
+        exam_report_object.save()
 
         return HttpResponse('Exam submitted.')
     else:
@@ -269,17 +267,12 @@ def new_batch(request):
         if form.is_valid():
             form.save(commit=False)
             user1 = request.POST.get('users')
-            print("***** TYPE OF USERS")
-            print(type(user1))
-            for x in user1:
-                print(x, '----------->')
             users_added = form.cleaned_data.get('users')
             form.save()
 
-            print("********")
             batches = list(Batch.objects.all())
             return JsonResponse({'status': 'save', 'batches': batches})
         else:
             return JsonResponse({'status': 0, 'errors': form.errors})
     else:
-        print('** Not a post')
+        return HttpResponse("Not a POST request")
