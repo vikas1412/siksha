@@ -5,7 +5,7 @@ from create_exam import views
 urlpatterns = [
     path("", views.home, name="home"),
 
-    path('list-all/', ExamListView.as_view(), name='exam'),
+    path('view/', ExamListView.as_view(), name='exam'),
 
     # Fetch one by one using AJAX
     path('<int:exam_id>/fetch/', views.preview_one_by_one, name='preview-one-by-one'),

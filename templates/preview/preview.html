@@ -21,7 +21,7 @@
 
 {% block css %}
     .modal-open .container-fluid, .modal-open  .container {
-    -webkit-filter: blur(9px) grayscale(90%);
+    -webkit-filter: blur(10px) grayscale(90%);
     }
 
     .mark-selected {
@@ -64,7 +64,6 @@
 
 {#            <div id="action-buttons" class="col-md-7 m-sm-auto order-md-2">#}
             <div id="action-buttons" class="col-md-7 mt-3 order-md-3">
-                <h1>{{ exam.batch.all.0 }} :fdffd</h1>
                 {% for question in questions %}
                     <form method="post" name="question-response-form" id="question-response-form">
                         {% csrf_token %}
@@ -127,8 +126,7 @@
                         Submit Test
                     </button>
                 </div>
-                <h4>{{exam.name}}</h4>
-                <h2>{{ exam.batch }} : testing</h2>
+                <h6>{{exam.name}}</h6>
                 <div class="list-group">
                     <a class="list-group-item list-group-item-action active" aria-current="true">
                         Quantitative Reasoning
@@ -221,7 +219,7 @@
                         {% csrf_token %}
                         <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Go Back</button>
 
-                        <input type="text" name="batch-name" value="{{ exam.batch }}">
+                        <input type="hidden" name="batch-name" value="{{ exam.batch }}">
                         <input type="hidden" name="has-finished" value="True">
                         <input type="hidden" name="has-started" value="True">
                         <input type="time" hidden name="exam-duration">
